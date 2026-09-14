@@ -9,6 +9,10 @@ public class Sucursal {
     private String telefono;
     private String estado; // Activa, Inactiva
 
+    public Sucursal() {
+    }
+
+
     public Sucursal(int idSucursal, String nombre, String direccion, String telefono, String estado) {
         this.idSucursal = idSucursal;
         this.nombre = nombre;

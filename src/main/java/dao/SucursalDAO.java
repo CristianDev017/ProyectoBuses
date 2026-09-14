@@ -4,25 +4,21 @@ import modelo.Sucursal;
 import util.ConexionBD;
 
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.time.LocalDateTime;
-
-
 
 public class SucursalDAO {
 
-    public int insertarSucursal(String nombre, String direccion, String telefono, String estado) {
+    public int insertarSucursal(Sucursal s) {
         String sql = "INSERT INTO Sucursal (nombre, direccion, telefono, estado) VALUES (?, ?, ?, ?)";
 
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setString(1, nombre);
-            ps.setString(2, direccion);
-            ps.setString(3, telefono);
-            ps.setString(4, estado);
+            ps.setString(1, s.getNombre());
+            ps.setString(2, s.getDireccion());
+            ps.setString(3, s.getTelefono());
+            ps.setString(4, s.getEstado());
 
             int filasAfectadas = ps.executeUpdate();
 
@@ -63,7 +59,4 @@ public class SucursalDAO {
 
         return sucursales;
     }
-
-
-
 }

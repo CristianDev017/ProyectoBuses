@@ -1,48 +1,32 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html>
-    <head>
-        <title>JSP - Hello World</title>
-    </head>
-
-    <body>
-        <h1>
-            <%= "Hello World!" %>
-        </h1>
-
-        <br/>
-
-        <%
-            String name = request.getParameter("name");
-            if (name != null && !name.isEmpty()) {
-        %>
-                <h2>
-                    Hello, <%= name %>!
-                </h2>
-        <%
-            }else{
-        %>
-
-                <h2>
-                    Hello, Guest!
-                </h2>
-        <%
-        }
-        %>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title>Iniciar Sesión</title>
+    <jsp:include page="/includes/resources.jsp"/>
+</head>
+<body>
+<div class="container mt-5" style="max-width: 400px;">
+    <h1 class="mb-4 text-center">Iniciar Sesión</h1>
 
 
-        <h2>
-            Current Date and Time: <%= new java.util.Date() %>
-        </h2>
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger">${error}</div>
+    </c:if>
 
-        <%
-            String nombre = "Cristiann";
-        %>
-            <h2>
-                Hola, <%= nombre %>!
-            </h2>
-
-
-    </body>
+    <form method="post" action="${pageContext.servletContext.contextPath}/login">
+        <div class="mb-3">
+            <label class="form-label">Correo</label>
+            <input type="email" name="correo" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <input type="password" name="password" class="form-control" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+    </form>
+</div>
+</body>
 </html>
