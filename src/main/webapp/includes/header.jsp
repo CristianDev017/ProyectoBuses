@@ -18,6 +18,8 @@
             <c:if test="${sessionScope.usuario.rol == 'ADMINISTRADOR_DE_SUCURSAL'}">
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/bus">Buses</a>
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/chofer">Choferes</a>
+                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/ruta">Rutas</a>
+                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/viaje">Viajes</a>
             </c:if>
         </div>
     </div>
