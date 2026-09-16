@@ -41,9 +41,16 @@
         <td><c:out value="${v.fechaLlegadaEstimada}"/></td>
         <td>${v.estado}</td>
         <td>
-          <a href="${pageContext.servletContext.contextPath}/registro-salida?idViaje=${v.idViaje}" class="btn btn-warning btn-sm">
-            Registrar salida
-          </a>
+          <c:if test="${v.estado == 'EN_TRANSITO'}">
+            <a href="${pageContext.servletContext.contextPath}/registro-llegada?idViaje=${v.idViaje}" class="btn btn-sm btn-info">
+              Registrar Llegada
+            </a>
+          </c:if>
+          <c:if test="${v.estado == 'PROGRAMADO'}">
+            <a href="${pageContext.servletContext.contextPath}/registro-salida?idViaje=${v.idViaje}" class="btn btn-sm btn-warning">
+              Registrar Salida
+            </a>
+          </c:if>
         </td>
       </tr>
     </c:forEach>

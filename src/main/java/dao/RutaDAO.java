@@ -93,4 +93,40 @@ public class RutaDAO {
 
         return rutas;
     }
+
+    public Ruta buscarPorId(int idRuta) {
+        String sql = "SELECT * FROM Ruta WHERE id_ruta = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idRuta);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int origenVal = rs.getInt("id_sucursal_origen");
+                    Integer idSucursalOrigen = rs.wasNull() ? null : origenVal;
+
+                    int destinoVal = rs.getInt("id_sucursal_destino");
+                    Integer idSucursalDestino = rs.wasNull() ? null : destinoVal;
+
+                    double distanciaVal = rs.getDouble("distancia_km");
+                    Double distanciaKm = rs.wasNull() ? null : distanciaVal;
+
+                    double precioVal = rs.getDouble("precio_boleto");
+                    Double precioBoleto = rs.wasNull() ? null : precioVal;
+
+                    String estado = rs.getString("estado");
+
+                    return new Ruta(idRuta, idSucursalOrigen, idSucursalDestino, distanciaKm, precioBoleto, estado);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
 }
+

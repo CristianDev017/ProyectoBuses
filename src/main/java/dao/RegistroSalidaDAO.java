@@ -3,12 +3,7 @@ package dao;
 import modelo.RegistroSalida;
 import util.ConexionBD;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.sql.Types;
+import java.sql.*;
 
 public class RegistroSalidaDAO {
 
@@ -58,5 +53,47 @@ public class RegistroSalidaDAO {
         }
 
         return 0;
+    }
+
+    public RegistroSalida buscarPorIdViaje(int idViaje) {
+        String sql = "SELECT * FROM RegistroSalida WHERE id_viaje = ? ORDER BY id_salida DESC LIMIT 1";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idViaje);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    int idSalida = rs.getInt("id_salida");
+
+                    int idBusVal = rs.getInt("id_bus");
+                    Integer idBus = rs.wasNull() ? null : idBusVal;
+
+                    int idChoferVal = rs.getInt("id_chofer");
+                    Integer idChofer = rs.wasNull() ? null : idChoferVal;
+
+                    Timestamp fechaHora = rs.getTimestamp("fecha_hora_salida_real");
+
+                    int kmVal = rs.getInt("kilometraje_inicial");
+                    Integer kilometrajeInicial = rs.wasNull() ? null : kmVal;
+
+                    RegistroSalida r = new RegistroSalida();
+                    r.setIdSalida(idSalida);
+                    r.setIdViaje(idViaje);
+                    r.setIdBus(idBus);
+                    r.setIdChofer(idChofer);
+                    r.setFechaHoraSalidaReal(fechaHora);
+                    r.setKilometrajeInicial(kilometrajeInicial);
+
+                    return r;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
     }
 }
