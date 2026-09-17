@@ -157,4 +157,21 @@ public class ViajeDAO {
 
         return viajes;
     }
+
+    public boolean tieneViajesActivos(int idBus) {
+        String sql = "SELECT COUNT(*) FROM Viaje WHERE id_bus = ? AND estado IN ('PROGRAMADO', 'EN_TRANSITO')";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idBus);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

@@ -23,7 +23,7 @@
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/chofer">Choferes</a>
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/ruta">Rutas</a>
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/viaje">Viajes</a>
-                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/reporte-depreciacion">Reporte Depreciación</a>
+                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/reporte-sucursal">Reportes</a>
             </c:if>
 
             <c:if test="${sessionScope.usuario.rol == 'CLIENTE'}">

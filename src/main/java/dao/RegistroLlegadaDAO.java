@@ -90,4 +90,35 @@ public class RegistroLlegadaDAO {
 
         return resultado;
     }
+
+    public List<Object[]> reporteDepreciacionPorSucursal(int idSucursal) {
+        List<Object[]> resultado = new ArrayList<>();
+        String sql = "SELECT b.id_bus, b.placa, b.marca, b.modelo, " +
+                "COALESCE(SUM(rl.kilometraje_final - rs.kilometraje_inicial), 0) AS km_totales, " +
+                "COALESCE(SUM(rl.monto_depreciacion), 0) AS depreciacion_total " +
+                "FROM Bus b " +
+                "LEFT JOIN Viaje v ON v.id_bus = b.id_bus " +
+                "LEFT JOIN RegistroSalida rs ON rs.id_viaje = v.id_viaje " +
+                "LEFT JOIN RegistroLlegada rl ON rl.id_viaje = v.id_viaje " +
+                "WHERE b.id_sucursal = ? " +
+                "GROUP BY b.id_bus, b.placa, b.marca, b.modelo";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idSucursal);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    resultado.add(new Object[]{
+                            rs.getString("placa"),
+                            rs.getString("marca") + " " + rs.getString("modelo"),
+                            rs.getInt("km_totales"),
+                            String.format("Q%.2f", rs.getDouble("depreciacion_total"))
+                    });
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return resultado;
+    }
 }
