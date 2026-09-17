@@ -49,5 +49,6 @@
         <a href="${pageContext.servletContext.contextPath}/viaje" class="btn btn-secondary">Cancelar</a>
     </form>
 </div>
+<jsp:include page="/includes/footer.jsp"/>
 </body>
 </html>

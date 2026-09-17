@@ -59,5 +59,6 @@
         <button type="submit" class="btn btn-primary">Guardar</button>
     </form>
 </div>
+<jsp:include page="/includes/footer.jsp"/>
 </body>
 </html>

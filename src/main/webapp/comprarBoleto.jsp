@@ -40,5 +40,6 @@
         <button type="submit" class="btn btn-primary">Pagar con cartera digital</button>
     </form>
 </div>
+<jsp:include page="/includes/footer.jsp"/>
 </body>
 </html>

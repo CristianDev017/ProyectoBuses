@@ -62,5 +62,6 @@
         <a href="${pageContext.servletContext.contextPath}/">Ya tengo cuenta, iniciar sesión</a>
     </p>
 </div>
+<jsp:include page="/includes/footer.jsp"/>
 </body>
 </html>

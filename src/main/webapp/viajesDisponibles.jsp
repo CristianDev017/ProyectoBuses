@@ -38,5 +38,6 @@
         </tbody>
     </table>
 </div>
+<jsp:include page="/includes/footer.jsp"/>
 </body>
 </html>
