@@ -44,6 +44,20 @@ public class ChoferServlet extends HttpServlet {
         Usuario usuarioLogueado = verificarSesion(req, resp, "ADMINISTRADOR_DE_SUCURSAL");
         if (usuarioLogueado == null) return;
 
+        String accion = req.getParameter("accion");
+        if ("editar".equalsIgnoreCase(accion)) {
+            String idParam = req.getParameter("id");
+            if (idParam != null && !idParam.trim().isEmpty()) {
+                try {
+                    Chofer choferEditar = choferDAO.buscarPorId(Integer.parseInt(idParam));
+                    req.setAttribute("choferEditar", choferEditar);
+                    req.getRequestDispatcher("/registrarChofer.jsp").forward(req, resp);
+                    return;
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+
         List<Chofer> lista = choferDAO.listarTodos();
         req.setAttribute("choferes", lista);
         req.getRequestDispatcher("/listadoChoferes.jsp").forward(req, resp);
@@ -81,9 +95,25 @@ public class ChoferServlet extends HttpServlet {
             }
         }
 
-        ch.setEstado("ACTIVO");
+        ch.setEstado(req.getParameter("estado"));
 
-        choferDAO.insertarChofer(ch);
+        String idParam = req.getParameter("idChofer");
+        if (idParam != null && !idParam.trim().isEmpty()) {
+            ch.setIdChofer(Integer.parseInt(idParam));
+            boolean exito = choferDAO.actualizar(ch);
+
+            if (!exito && choferDAO.getUltimoError() != null) {
+                req.setAttribute("error", choferDAO.getUltimoError());
+                req.setAttribute("choferEditar", ch);
+                req.getRequestDispatcher("/registrarChofer.jsp").forward(req, resp);
+                return;
+            }
+        } else {
+            if (ch.getEstado() == null || ch.getEstado().trim().isEmpty()) {
+                ch.setEstado("ACTIVO");
+            }
+            choferDAO.insertarChofer(ch);
+        }
 
         resp.sendRedirect("chofer");
     }

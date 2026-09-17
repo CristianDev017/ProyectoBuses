@@ -23,6 +23,7 @@
     + Nueva Sucursal
   </a>
 
+
   <table class="table table-striped">
     <thead>
     <tr>
@@ -41,6 +42,9 @@
         <td>${s.direccion}</td>
         <td>${s.telefono}</td>
         <td>${s.estado}</td>
+        <td>
+          <a href="${pageContext.servletContext.contextPath}/sucursal?accion=editar&id=${s.idSucursal}" class="btn btn-sm btn-warning">Editar</a>
+        </td>
       </tr>
     </c:forEach>
     </tbody>

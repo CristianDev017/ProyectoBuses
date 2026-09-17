@@ -13,6 +13,7 @@
         <div>
             <c:if test="${sessionScope.usuario.rol == 'ADMINISTRADOR'}">
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/sucursal">Sucursales</a>
+                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/usuario">Usuarios</a>
             </c:if>
 
             <c:if test="${sessionScope.usuario.rol == 'ADMINISTRADOR_DE_SUCURSAL'}">
@@ -20,6 +21,16 @@
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/chofer">Choferes</a>
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/ruta">Rutas</a>
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/viaje">Viajes</a>
+            </c:if>
+
+            <c:if test="${sessionScope.usuario.rol == 'CLIENTE'}">
+                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/cartera">Mi Cartera</a>
+                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/boleto">Viajes Disponibles</a>
+                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/boleto?accion=misBoletos">Mis Boletos</a>
+            </c:if>
+
+            <c:if test="${not empty sessionScope.usuario}">
+                <a class="btn btn-outline-danger btn-sm" href="${pageContext.servletContext.contextPath}/logout">Cerrar sesión</a>
             </c:if>
         </div>
     </div>

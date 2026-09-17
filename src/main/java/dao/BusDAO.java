@@ -9,6 +9,12 @@ import java.util.List;
 
 public class BusDAO {
 
+    private String ultimoError;
+
+    public String getUltimoError() {
+        return ultimoError;
+    }
+
     public int insertarBus(Bus b) {
         String sql = "INSERT INTO Bus (id_sucursal, foto, placa, marca, modelo, anio_fabricacion, capacidad, estado_operativo, kilometraje_actual) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
 
@@ -101,6 +107,40 @@ public class BusDAO {
         }
 
         return null;
+    }
+
+    public boolean actualizar(Bus b) {
+        String sql = "UPDATE Bus SET placa=?, marca=?, modelo=?, anio_fabricacion=?, capacidad=?, estado_operativo=?, foto=? WHERE id_bus=?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setString(1, b.getPlaca());
+            ps.setString(2, b.getMarca());
+            ps.setString(3, b.getModelo());
+            if (b.getAnioFabricacion() != null) {
+                ps.setInt(4, b.getAnioFabricacion());
+            } else {
+                ps.setNull(4, Types.INTEGER);
+            }
+            if (b.getCapacidad() != null) {
+                ps.setInt(5, b.getCapacidad());
+            } else {
+                ps.setNull(5, Types.INTEGER);
+            }
+            ps.setString(6, b.getEstadoOperativo());
+            ps.setString(7, b.getFoto());
+            ps.setInt(8, b.getIdBus());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLIntegrityConstraintViolationException e) {
+            ultimoError = "Ya existe otro bus con esa placa.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            ultimoError = "Error al actualizar el bus.";
+        }
+        return false;
     }
 
     public List<Bus> listarTodos() {

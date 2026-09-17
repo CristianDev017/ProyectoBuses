@@ -33,6 +33,7 @@
       <th>Capacidad</th>
       <th>Estado</th>
       <th>Kilometraje</th>
+      <th>Acciones</th>
     </tr>
     </thead>
     <tbody>
@@ -47,6 +48,9 @@
         <td>${b.capacidad}</td>
         <td>${b.estadoOperativo}</td>
         <td>${b.kilometrajeActual}</td>
+        <td>
+          <a href="${pageContext.servletContext.contextPath}/bus?accion=editar&id=${b.idBus}" class="btn btn-sm btn-warning">Editar</a>
+        </td>
       </tr>
     </c:forEach>
     </tbody>

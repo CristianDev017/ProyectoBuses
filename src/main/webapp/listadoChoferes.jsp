@@ -33,6 +33,7 @@
       <th>Teléfono</th>
       <th>Salario</th>
       <th>Estado</th>
+      <th>Acciones</th>
     </tr>
     </thead>
     <tbody>
@@ -47,6 +48,9 @@
         <td>${c.telefono}</td>
         <td>${c.salarioBaseViaje}</td>
         <td>${c.estado}</td>
+        <td>
+          <a href="${pageContext.servletContext.contextPath}/chofer?accion=editar&id=${c.idChofer}" class="btn btn-sm btn-warning">Editar</a>
+        </td>
       </tr>
     </c:forEach>
     </tbody>

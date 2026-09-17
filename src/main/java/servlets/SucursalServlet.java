@@ -48,12 +48,27 @@ public class SucursalServlet extends HttpServlet {
 
         return usuarioLogueado;
     }
+
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
             throws ServletException, IOException {
 
         Usuario usuarioLogueado = verificarSesion(req, resp, "ADMINISTRADOR");
         if (usuarioLogueado == null) return;
+
+        String accion = req.getParameter("accion");
+        if ("editar".equalsIgnoreCase(accion)) {
+            String idParam = req.getParameter("id");
+            if (idParam != null && !idParam.trim().isEmpty()) {
+                try {
+                    Sucursal s = sucursalDAO.buscarPorId(Integer.parseInt(idParam));
+                    req.setAttribute("sucursal", s);
+                    req.getRequestDispatcher("/registrarSucursal.jsp").forward(req, resp);
+                    return;
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
 
         List<Sucursal> lista = sucursalDAO.listarTodas();
         req.setAttribute("sucursales", lista);
@@ -67,13 +82,32 @@ public class SucursalServlet extends HttpServlet {
         Usuario usuarioLogueado = verificarSesion(req, resp, "ADMINISTRADOR");
         if (usuarioLogueado == null) return;
 
+        String idParam = req.getParameter("idSucursal");
         Sucursal sucursal = new Sucursal();
         sucursal.setNombre(req.getParameter("nombre"));
         sucursal.setDireccion(req.getParameter("direccion"));
         sucursal.setTelefono(req.getParameter("telefono"));
         sucursal.setEstado(req.getParameter("estado"));
 
-        sucursalDAO.insertarSucursal(sucursal);
+        if (idParam != null && !idParam.trim().isEmpty()) {
+            sucursal.setIdSucursal(Integer.parseInt(idParam));
+            boolean exito = sucursalDAO.actualizar(sucursal);
+
+            if (!exito && sucursalDAO.getUltimoError() != null) {
+                req.setAttribute("error", sucursalDAO.getUltimoError());
+                req.setAttribute("sucursal", sucursal); // para que el form no pierda los datos ya escritos
+                req.getRequestDispatcher("/registrarSucursal.jsp").forward(req, resp);
+                return;
+            }
+        } else {
+            int id = sucursalDAO.insertarSucursal(sucursal);
+
+            if (id == 0 && sucursalDAO.getUltimoError() != null) {
+                req.setAttribute("error", sucursalDAO.getUltimoError());
+                req.getRequestDispatcher("/registrarSucursal.jsp").forward(req, resp);
+                return;
+            }
+        }
 
         resp.sendRedirect("sucursal");
     }

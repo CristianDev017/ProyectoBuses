@@ -63,6 +63,19 @@ public class RutaServlet extends HttpServlet {
         req.setAttribute("sucursales", sucursales);
 
         String accion = req.getParameter("accion");
+        if ("editar".equalsIgnoreCase(accion)) {
+            String idParam = req.getParameter("id");
+            if (idParam != null && !idParam.trim().isEmpty()) {
+                try {
+                    Ruta rutaEditar = rutaDAO.buscarPorId(Integer.parseInt(idParam));
+                    req.setAttribute("rutaEditar", rutaEditar);
+                    req.getRequestDispatcher("/registrarRuta.jsp").forward(req, resp);
+                    return;
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+
         if ("nuevo".equalsIgnoreCase(accion)) {
             req.getRequestDispatcher("/registrarRuta.jsp").forward(req, resp);
             return;
@@ -109,7 +122,20 @@ public class RutaServlet extends HttpServlet {
 
         ruta.setEstado(req.getParameter("estado"));
 
-        rutaDAO.insertarRuta(ruta);
+        String idParam = req.getParameter("idRuta");
+        if (idParam != null && !idParam.trim().isEmpty()) {
+            ruta.setIdRuta(Integer.parseInt(idParam));
+            boolean exito = rutaDAO.actualizar(ruta);
+
+            if (!exito && rutaDAO.getUltimoError() != null) {
+                req.setAttribute("error", rutaDAO.getUltimoError());
+                req.setAttribute("rutaEditar", ruta);
+                req.getRequestDispatcher("/registrarRuta.jsp").forward(req, resp);
+                return;
+            }
+        } else {
+            rutaDAO.insertarRuta(ruta);
+        }
 
         resp.sendRedirect("ruta");
     }

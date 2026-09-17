@@ -122,4 +122,10 @@ public class Usuario {
     public void setPassword(String password) {
         this.password = password;
     }
+
+    private String ultimoError;
+
+    public String getUltimoError() {
+        return ultimoError;
+    }
 }

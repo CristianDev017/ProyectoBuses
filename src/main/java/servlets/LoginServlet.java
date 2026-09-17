@@ -48,9 +48,9 @@ public class LoginServlet extends HttpServlet {
                 return;
 
             } else if (rol.equalsIgnoreCase("CLIENTE")) {
-                resp.sendRedirect(context + "/");
+            resp.sendRedirect(context + "/cartera");
                 return;
-            }
+        }
 
             resp.sendRedirect(context + "/");
 

@@ -26,6 +26,10 @@
             <input type="password" name="password" class="form-control" required>
         </div>
         <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+
+        <p class="mt-3 text-center">
+            <a href="${pageContext.servletContext.contextPath}/registro-cliente">¿No tienes cuenta? Regístrate aquí</a>
+        </p>
     </form>
 </div>
 </body>

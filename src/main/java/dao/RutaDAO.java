@@ -9,6 +9,12 @@ import java.util.List;
 
 public class RutaDAO {
 
+    private String ultimoError;
+
+    public String getUltimoError() {
+        return ultimoError;
+    }
+
     public int insertarRuta(Ruta r) {
         String sql = "INSERT INTO Ruta (id_sucursal_origen, id_sucursal_destino, distancia_km, precio_boleto, estado) VALUES (?, ?, ?, ?, ?)";
 
@@ -58,6 +64,41 @@ public class RutaDAO {
         return 0;
     }
 
+    public boolean actualizar(Ruta r) {
+        String sql = "UPDATE Ruta SET id_sucursal_destino=?, distancia_km=?, precio_boleto=?, estado=? WHERE id_ruta=?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            if (r.getIdSucursalDestino() != null) {
+               ps.setInt(1, r.getIdSucursalDestino());
+            } else {
+               ps.setNull(1, Types.INTEGER);
+            }
+            if (r.getDistanciaKm() != null) {
+               ps.setDouble(2, r.getDistanciaKm());
+            } else {
+               ps.setNull(2, Types.DOUBLE);
+            }
+            if (r.getPrecioBoleto() != null) {
+               ps.setDouble(3, r.getPrecioBoleto());
+            } else {
+               ps.setNull(3, Types.DOUBLE);
+            }
+            ps.setString(4, r.getEstado());
+            ps.setInt(5, r.getIdRuta());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLIntegrityConstraintViolationException e) {
+            ultimoError = "Ya existe otra ruta con ese origen y destino.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            ultimoError = "Error al actualizar la ruta.";
+        }
+        return false;
+    }
+
     public List<Ruta> listarTodas() {
         List<Ruta> rutas = new ArrayList<>();
         String sql = "SELECT * FROM Ruta";
@@ -67,24 +108,24 @@ public class RutaDAO {
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                int idRuta = rs.getInt("id_ruta");
+               int idRuta = rs.getInt("id_ruta");
 
-                int origenVal = rs.getInt("id_sucursal_origen");
-                Integer idSucursalOrigen = rs.wasNull() ? null : origenVal;
+               int origenVal = rs.getInt("id_sucursal_origen");
+               Integer idSucursalOrigen = rs.wasNull() ? null : origenVal;
 
-                int destinoVal = rs.getInt("id_sucursal_destino");
-                Integer idSucursalDestino = rs.wasNull() ? null : destinoVal;
+               int destinoVal = rs.getInt("id_sucursal_destino");
+               Integer idSucursalDestino = rs.wasNull() ? null : destinoVal;
 
-                double distanciaVal = rs.getDouble("distancia_km");
-                Double distanciaKm = rs.wasNull() ? null : distanciaVal;
+               double distanciaVal = rs.getDouble("distancia_km");
+               Double distanciaKm = rs.wasNull() ? null : distanciaVal;
 
-                double precioVal = rs.getDouble("precio_boleto");
-                Double precioBoleto = rs.wasNull() ? null : precioVal;
+               double precioVal = rs.getDouble("precio_boleto");
+               Double precioBoleto = rs.wasNull() ? null : precioVal;
 
-                String estado = rs.getString("estado");
+               String estado = rs.getString("estado");
 
-                Ruta ruta = new Ruta(idRuta, idSucursalOrigen, idSucursalDestino, distanciaKm, precioBoleto, estado);
-                rutas.add(ruta);
+               Ruta ruta = new Ruta(idRuta, idSucursalOrigen, idSucursalDestino, distanciaKm, precioBoleto, estado);
+               rutas.add(ruta);
             }
 
         } catch (SQLException e) {
@@ -103,23 +144,23 @@ public class RutaDAO {
             ps.setInt(1, idRuta);
 
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    int origenVal = rs.getInt("id_sucursal_origen");
-                    Integer idSucursalOrigen = rs.wasNull() ? null : origenVal;
+               if (rs.next()) {
+                   int origenVal = rs.getInt("id_sucursal_origen");
+                   Integer idSucursalOrigen = rs.wasNull() ? null : origenVal;
 
-                    int destinoVal = rs.getInt("id_sucursal_destino");
-                    Integer idSucursalDestino = rs.wasNull() ? null : destinoVal;
+                   int destinoVal = rs.getInt("id_sucursal_destino");
+                   Integer idSucursalDestino = rs.wasNull() ? null : destinoVal;
 
-                    double distanciaVal = rs.getDouble("distancia_km");
-                    Double distanciaKm = rs.wasNull() ? null : distanciaVal;
+                   double distanciaVal = rs.getDouble("distancia_km");
+                   Double distanciaKm = rs.wasNull() ? null : distanciaVal;
 
-                    double precioVal = rs.getDouble("precio_boleto");
-                    Double precioBoleto = rs.wasNull() ? null : precioVal;
+                   double precioVal = rs.getDouble("precio_boleto");
+                   Double precioBoleto = rs.wasNull() ? null : precioVal;
 
-                    String estado = rs.getString("estado");
+                   String estado = rs.getString("estado");
 
-                    return new Ruta(idRuta, idSucursalOrigen, idSucursalDestino, distanciaKm, precioBoleto, estado);
-                }
+                   return new Ruta(idRuta, idSucursalOrigen, idSucursalDestino, distanciaKm, precioBoleto, estado);
+               }
             }
 
         } catch (SQLException e) {

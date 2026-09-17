@@ -56,6 +56,20 @@ public class BusServlet extends HttpServlet {
         Usuario usuarioLogueado = verificarSesion(req, resp, "ADMINISTRADOR_DE_SUCURSAL");
         if (usuarioLogueado == null) return;
 
+        String accion = req.getParameter("accion");
+        if ("editar".equalsIgnoreCase(accion)) {
+            String idParam = req.getParameter("id");
+            if (idParam != null && !idParam.trim().isEmpty()) {
+                try {
+                    Bus busEditar = busDAO.buscarPorId(Integer.parseInt(idParam));
+                    req.setAttribute("busEditar", busEditar);
+                    req.getRequestDispatcher("/registrarBus.jsp").forward(req, resp);
+                    return;
+                } catch (NumberFormatException ignored) {
+                }
+            }
+        }
+
         List<Bus> lista = busDAO.listarTodos();
         req.setAttribute("buses", lista);
         req.getRequestDispatcher("/listadoBuses.jsp").forward(req, resp);
@@ -69,7 +83,6 @@ public class BusServlet extends HttpServlet {
         if (usuarioLogueado == null) return;
 
         Bus bus = new Bus();
-
         bus.setIdSucursal(usuarioLogueado.getIdSucursal());
 
         bus.setFoto(req.getParameter("foto"));
@@ -103,7 +116,20 @@ public class BusServlet extends HttpServlet {
             }
         }
 
-        busDAO.insertarBus(bus);
+        String idParam = req.getParameter("idBus");
+        if (idParam != null && !idParam.trim().isEmpty()) {
+            bus.setIdBus(Integer.parseInt(idParam));
+            boolean exito = busDAO.actualizar(bus);
+
+            if (!exito && busDAO.getUltimoError() != null) {
+                req.setAttribute("error", busDAO.getUltimoError());
+                req.setAttribute("busEditar", bus);
+                req.getRequestDispatcher("/registrarBus.jsp").forward(req, resp);
+                return;
+            }
+        } else {
+            busDAO.insertarBus(bus);
+        }
 
         resp.sendRedirect("bus");
     }

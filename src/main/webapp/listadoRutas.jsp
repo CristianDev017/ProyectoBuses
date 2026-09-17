@@ -22,6 +22,7 @@
             <th>Distancia (km)</th>
             <th>Precio</th>
             <th>Estado</th>
+            <th>Acciones</th>
         </tr>
         </thead>
         <tbody>
@@ -33,6 +34,9 @@
                 <td>${r.distanciaKm}</td>
                 <td>${r.precioBoleto}</td>
                 <td>${r.estado}</td>
+                <td>
+                    <a href="${pageContext.servletContext.contextPath}/ruta?accion=editar&id=${r.idRuta}" class="btn btn-sm btn-warning">Editar</a>
+                </td>
             </tr>
         </c:forEach>
         </tbody>

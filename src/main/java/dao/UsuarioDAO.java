@@ -6,6 +6,7 @@ import util.ConexionBD;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.sql.SQLIntegrityConstraintViolationException;
 
 public class UsuarioDAO {
 
@@ -34,7 +35,6 @@ public class UsuarioDAO {
             ps.setString(10, u.getPassword());
 
             int filasAfectadas = ps.executeUpdate();
-
             if (filasAfectadas > 0) {
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (rs.next()) {
@@ -43,11 +43,20 @@ public class UsuarioDAO {
                 }
             }
 
+        } catch (SQLIntegrityConstraintViolationException e) {
+            ultimoError = "Ya existe un usuario con ese DPI, NIT o correo.";
         } catch (SQLException e) {
             e.printStackTrace();
+            ultimoError = "Error al guardar el usuario.";
         }
 
         return 0;
+    }
+
+    private String ultimoError;
+
+    public String getUltimoError() {
+        return ultimoError;
     }
 
     public List<Usuario> listarTodos() {
@@ -137,6 +146,38 @@ public class UsuarioDAO {
         }
 
         return null;
+    }
+
+    public boolean actualizar(Usuario u) {
+        String sql = "UPDATE Usuario SET id_sucursal=?, dpi=?, nombre_completo=?, nit=?, telefono=?, direccion=?, rol=?, estado=?, correo=? WHERE id_usuario=?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            if (u.getIdSucursal() != null) {
+                ps.setInt(1, u.getIdSucursal());
+            } else {
+                ps.setNull(1, Types.INTEGER);
+            }
+            ps.setString(2, u.getDpi());
+            ps.setString(3, u.getNombreCompleto());
+            ps.setString(4, u.getNit());
+            ps.setString(5, u.getTelefono());
+            ps.setString(6, u.getDireccion());
+            ps.setString(7, u.getRol());
+            ps.setString(8, u.getEstado());
+            ps.setString(9, u.getCorreo());
+            ps.setInt(10, u.getIdUsuario());
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLIntegrityConstraintViolationException e) {
+            ultimoError = "Ya existe otro usuario con ese DPI, NIT o correo.";
+        } catch (SQLException e) {
+            e.printStackTrace();
+            ultimoError = "Error al actualizar el usuario.";
+        }
+        return false;
     }
 
     public boolean cambiarEstado(int idUsuario, String estado) {
