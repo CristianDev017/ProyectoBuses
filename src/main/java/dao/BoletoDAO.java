@@ -65,4 +65,63 @@ public class BoletoDAO {
         }
         return 0;
     }
+
+    public int comprarBoletoTransaccional(Boleto b, int idCartera, double nuevoSaldo) {
+        String sqlBoleto = "INSERT INTO Boleto (id_viaje, id_usuario, numero_asiento, precio, fecha_pago, estado) VALUES (?, ?, ?, ?, ?, ?)";
+        String sqlCartera = "UPDATE Cartera SET saldo = ? WHERE id_cartera = ?";
+
+        Connection con = null;
+        try {
+            con = ConexionBD.obtenerConexion();
+            con.setAutoCommit(false);
+
+            int idBoletoGenerado = 0;
+
+            try (PreparedStatement psBoleto = con.prepareStatement(sqlBoleto, Statement.RETURN_GENERATED_KEYS)) {
+                psBoleto.setInt(1, b.getIdViaje());
+                psBoleto.setInt(2, b.getIdUsuario());
+                psBoleto.setInt(3, b.getNumeroAsiento());
+                psBoleto.setDouble(4, b.getPrecio());
+                psBoleto.setDate(5, b.getFechaPago());
+                psBoleto.setString(6, b.getEstado());
+
+                psBoleto.executeUpdate();
+
+                try (ResultSet rs = psBoleto.getGeneratedKeys()) {
+                    if (rs.next()) {
+                        idBoletoGenerado = rs.getInt(1);
+                    }
+                }
+            }
+
+            try (PreparedStatement psCartera = con.prepareStatement(sqlCartera)) {
+                psCartera.setDouble(1, nuevoSaldo);
+                psCartera.setInt(2, idCartera);
+                psCartera.executeUpdate();
+            }
+
+            con.commit();
+            return idBoletoGenerado;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            if (con != null) {
+                try {
+                    con.rollback();
+                } catch (SQLException ex) {
+                    ex.printStackTrace();
+                }
+            }
+            return 0;
+        } finally {
+            if (con != null) {
+                try {
+                    con.setAutoCommit(true);
+                    con.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
 }

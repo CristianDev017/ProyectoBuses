@@ -27,4 +27,21 @@ public class ConfiguracionSistemaDAO {
 
         return null;
     }
+
+    public boolean actualizarMonto(double nuevoMonto, java.sql.Date fecha) {
+        String sql = "UPDATE ConfiguracionSistema SET monto_depreciacion_km = ?, fecha_actualizacion = ? ORDER BY fecha_actualizacion DESC LIMIT 1";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setDouble(1, nuevoMonto);
+            ps.setDate(2, fecha);
+
+            return ps.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

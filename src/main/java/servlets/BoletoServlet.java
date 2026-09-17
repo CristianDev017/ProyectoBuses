@@ -130,11 +130,10 @@ public class BoletoServlet extends HttpServlet {
             b.setFechaPago(fechaPago);
             b.setEstado("PAGADO");
 
-            int idBoleto = boletoDAO.insertar(b);
+            double nuevoSaldo = cartera.getSaldo() - precio;
+            int idBoleto = boletoDAO.comprarBoletoTransaccional(b, cartera.getIdCartera(), nuevoSaldo);
 
             if (idBoleto > 0) {
-                double nuevoSaldo = cartera.getSaldo() - precio;
-                carteraDAO.actualizarSaldo(cartera.getIdCartera(), nuevoSaldo);
                 movimientoDAO.insertar(cartera.getIdCartera(), "PAGO", precio, fechaPago, "Compra boleto viaje " + idViaje);
             }
 

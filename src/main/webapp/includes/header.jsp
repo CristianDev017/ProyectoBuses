@@ -14,6 +14,8 @@
             <c:if test="${sessionScope.usuario.rol == 'ADMINISTRADOR'}">
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/sucursal">Sucursales</a>
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/usuario">Usuarios</a>
+                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/configuracion">Configuración</a>
+                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/reporte">Reportes</a>
             </c:if>
 
             <c:if test="${sessionScope.usuario.rol == 'ADMINISTRADOR_DE_SUCURSAL'}">
@@ -21,6 +23,7 @@
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/chofer">Choferes</a>
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/ruta">Rutas</a>
                 <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/viaje">Viajes</a>
+                <a class="btn btn-outline-light btn-sm" href="${pageContext.servletContext.contextPath}/reporte-depreciacion">Reporte Depreciación</a>
             </c:if>
 
             <c:if test="${sessionScope.usuario.rol == 'CLIENTE'}">
