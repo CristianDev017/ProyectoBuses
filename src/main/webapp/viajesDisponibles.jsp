@@ -1,10 +1,3 @@
-<%--
-  Created by IntelliJ IDEA.
-  User: crist
-  Date: 16/9/2026
-  Time: 17:04
-  To change this template use File | Settings | File Templates.
---%>
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
 <%@taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
@@ -16,24 +9,39 @@
 <body>
 <jsp:include page="/includes/header.jsp"/>
 <div class="container mt-4">
-    <h1>Viajes Disponibles</h1>
-    <table class="table table-striped">
-        <thead>
-        <tr><th>ID</th><th>Ruta</th><th>Salida</th><th>Estado</th><th></th></tr>
+    <h1>Viajes Regulares Disponibles</h1>
+
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger">${error}</div>
+    </c:if>
+
+    <table class="table table-striped table-bordered align-middle">
+        <thead class="table-dark">
+        <tr>
+            <th>Viaje</th>
+            <th>Ruta</th>
+            <th>Fecha salida</th>
+            <th>Hora salida</th>
+            <th>Precio</th>
+            <th>Bus</th>
+            <th>Asientos disponibles</th>
+            <th></th>
+        </tr>
         </thead>
         <tbody>
-        <c:forEach var="v" items="${viajes}">
-            <c:if test="${v.tipoViaje == 'REGULAR' and v.estado == 'PROGRAMADO'}">
-                <tr>
-                    <td>${v.idViaje}</td>
-                    <td>${v.idRuta}</td>
-                    <td><c:out value="${v.fechaSalida}"/></td>
-                    <td>${v.estado}</td>
-                    <td>
-                        <a href="${pageContext.servletContext.contextPath}/boleto?accion=comprar&idViaje=${v.idViaje}" class="btn btn-sm btn-primary">Comprar boleto</a>
-                    </td>
-                </tr>
-            </c:if>
+        <c:forEach var="detalle" items="${viajes}">
+            <tr>
+                <td>#${detalle.viaje.idViaje}</td>
+                <td>${detalle.rutaDescripcion}</td>
+                <td>${detalle.fechaSalidaTexto}</td>
+                <td>${detalle.horaSalidaTexto}</td>
+                <td>Q${detalle.ruta.precioBoleto}</td>
+                <td>${detalle.bus.placa}</td>
+                <td>${detalle.asientosDisponibles}</td>
+                <td>
+                    <a href="${pageContext.servletContext.contextPath}/boleto?accion=comprar&idViaje=${detalle.viaje.idViaje}" class="btn btn-sm btn-primary">Comprar boleto</a>
+                </td>
+            </tr>
         </c:forEach>
         </tbody>
     </table>

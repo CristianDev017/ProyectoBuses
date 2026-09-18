@@ -2,6 +2,7 @@ package servlets;
 
 import dao.RutaDAO;
 import dao.SucursalDAO;
+import dao.ViajeDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -20,11 +21,13 @@ public class RutaServlet extends HttpServlet {
 
     private RutaDAO rutaDAO;
     private SucursalDAO sucursalDAO;
+    private ViajeDAO viajeDAO;
 
     @Override
     public void init() {
         rutaDAO = new RutaDAO();
         sucursalDAO = new SucursalDAO();
+        viajeDAO = new ViajeDAO();
     }
 
     private Usuario verificarSesion(HttpServletRequest req, HttpServletResponse resp, String... rolesPermitidos) throws IOException {
@@ -81,6 +84,26 @@ public class RutaServlet extends HttpServlet {
             return;
         }
 
+        if ("eliminar".equalsIgnoreCase(accion)) {
+            String idParam = req.getParameter("id");
+            if (idParam != null && !idParam.trim().isEmpty()) {
+                try {
+                    int idRuta = Integer.parseInt(idParam);
+                    if (viajeDAO.tieneViajesActivosParaRuta(idRuta)) {
+                        req.setAttribute("error", "No se puede eliminar la ruta: tiene viajes programados o en tránsito.");
+                        List<Ruta> rutas = rutaDAO.listarTodas();
+                        req.setAttribute("rutas", rutas);
+                        req.getRequestDispatcher("/listadoRutas.jsp").forward(req, resp);
+                        return;
+                    }
+                    rutaDAO.eliminar(idRuta);
+                } catch (NumberFormatException ignored) {
+                }
+            }
+            resp.sendRedirect(req.getContextPath() + "/ruta");
+            return;
+        }
+
         List<Ruta> rutas = rutaDAO.listarTodas();
         req.setAttribute("rutas", rutas);
         req.getRequestDispatcher("/listadoRutas.jsp").forward(req, resp);
@@ -125,11 +148,21 @@ public class RutaServlet extends HttpServlet {
         String idParam = req.getParameter("idRuta");
         if (idParam != null && !idParam.trim().isEmpty()) {
             ruta.setIdRuta(Integer.parseInt(idParam));
+
+            if ("INACTIVA".equalsIgnoreCase(ruta.getEstado()) && viajeDAO.tieneViajesActivosParaRuta(ruta.getIdRuta())) {
+                req.setAttribute("error", "No se puede desactivar la ruta: tiene viajes programados o en tránsito.");
+                req.setAttribute("rutaEditar", ruta);
+                req.setAttribute("sucursales", sucursalDAO.listarTodas());
+                req.getRequestDispatcher("/registrarRuta.jsp").forward(req, resp);
+                return;
+            }
+
             boolean exito = rutaDAO.actualizar(ruta);
 
             if (!exito && rutaDAO.getUltimoError() != null) {
                 req.setAttribute("error", rutaDAO.getUltimoError());
                 req.setAttribute("rutaEditar", ruta);
+                req.setAttribute("sucursales", sucursalDAO.listarTodas());
                 req.getRequestDispatcher("/registrarRuta.jsp").forward(req, resp);
                 return;
             }

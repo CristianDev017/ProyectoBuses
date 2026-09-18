@@ -1,6 +1,8 @@
 package servlets;
 
+import dao.CarteraDAO;
 import dao.UsuarioDAO;
+import modelo.Cartera;
 import modelo.Usuario;
 
 import jakarta.servlet.RequestDispatcher;
@@ -17,10 +19,12 @@ import java.io.IOException;
 public class LoginServlet extends HttpServlet {
 
     private UsuarioDAO usuarioDAO;
+    private CarteraDAO carteraDAO;
 
     @Override
     public void init() {
         usuarioDAO = new UsuarioDAO();
+        carteraDAO = new CarteraDAO();
     }
 
     @Override
@@ -33,6 +37,10 @@ public class LoginServlet extends HttpServlet {
         Usuario usuario = usuarioDAO.login(correo, password);
 
         if (usuario != null) {
+            Cartera cartera = carteraDAO.buscarPorIdUsuario(usuario.getIdUsuario());
+            if (cartera == null) {
+                carteraDAO.crearCartera(usuario.getIdUsuario());
+            }
 
             HttpSession session = req.getSession();
             session.setAttribute("usuario", usuario);

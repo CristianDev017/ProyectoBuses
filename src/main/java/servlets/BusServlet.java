@@ -1,6 +1,7 @@
 package servlets;
 
 import dao.BusDAO;
+import dao.ViajeDAO;
 import modelo.Bus;
 import modelo.Usuario;
 
@@ -18,10 +19,12 @@ import java.util.List;
 public class BusServlet extends HttpServlet {
 
     private BusDAO busDAO;
+    private ViajeDAO viajeDAO;
 
     @Override
     public void init() {
         busDAO = new BusDAO();
+        viajeDAO = new ViajeDAO();
     }
 
     private Usuario verificarSesion(HttpServletRequest req, HttpServletResponse resp, String... rolesPermitidos) throws IOException {
@@ -119,6 +122,14 @@ public class BusServlet extends HttpServlet {
         String idParam = req.getParameter("idBus");
         if (idParam != null && !idParam.trim().isEmpty()) {
             bus.setIdBus(Integer.parseInt(idParam));
+
+            if ("INACTIVO".equalsIgnoreCase(bus.getEstadoOperativo()) && viajeDAO.tieneViajesActivos(bus.getIdBus())) {
+                req.setAttribute("error", "No se puede desactivar el bus: tiene viajes programados o en tránsito.");
+                req.setAttribute("busEditar", bus);
+                req.getRequestDispatcher("/registrarBus.jsp").forward(req, resp);
+                return;
+            }
+
             boolean exito = busDAO.actualizar(bus);
 
             if (!exito && busDAO.getUltimoError() != null) {

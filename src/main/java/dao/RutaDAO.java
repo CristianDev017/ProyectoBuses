@@ -169,5 +169,63 @@ public class RutaDAO {
 
         return null;
     }
+
+    public boolean tieneViajesAsociados(int idRuta) {
+        String sql = "SELECT COUNT(*) FROM Viaje WHERE id_ruta = ? AND estado IN ('PROGRAMADO', 'EN_TRANSITO')";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idRuta);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean eliminar(int idRuta) {
+        String sqlDeleteBoleto = "DELETE FROM Boleto WHERE id_viaje IN (SELECT id_viaje FROM Viaje WHERE id_ruta = ?)";
+        String sqlDeleteLlegada = "DELETE FROM RegistroLlegada WHERE id_viaje IN (SELECT id_viaje FROM Viaje WHERE id_ruta = ?)";
+        String sqlDeleteSalida = "DELETE FROM RegistroSalida WHERE id_viaje IN (SELECT id_viaje FROM Viaje WHERE id_ruta = ?)";
+        String sqlDeleteViaje = "DELETE FROM Viaje WHERE id_ruta = ?";
+        String sqlDeleteRuta = "DELETE FROM Ruta WHERE id_ruta = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion()) {
+            con.setAutoCommit(false);
+
+            try (PreparedStatement psBoleto = con.prepareStatement(sqlDeleteBoleto);
+                PreparedStatement psLlegada = con.prepareStatement(sqlDeleteLlegada);
+                PreparedStatement psSalida = con.prepareStatement(sqlDeleteSalida);
+                PreparedStatement psViaje = con.prepareStatement(sqlDeleteViaje);
+                PreparedStatement psRuta = con.prepareStatement(sqlDeleteRuta)) {
+
+               psBoleto.setInt(1, idRuta);
+               psBoleto.executeUpdate();
+
+               psLlegada.setInt(1, idRuta);
+               psLlegada.executeUpdate();
+
+               psSalida.setInt(1, idRuta);
+               psSalida.executeUpdate();
+
+               psViaje.setInt(1, idRuta);
+               psViaje.executeUpdate();
+
+               psRuta.setInt(1, idRuta);
+               int filas = psRuta.executeUpdate();
+
+               con.commit();
+               return filas > 0;
+            } catch (SQLException e) {
+               con.rollback();
+               throw e;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }
 

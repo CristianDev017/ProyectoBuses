@@ -7,6 +7,7 @@ public class Viaje {
     private int idViaje;
     private Integer idBus;
     private Integer idChofer;
+    private String nombreChofer;
     private Integer idRuta;
     private String tipoViaje;
     private Timestamp fechaSalida;
@@ -49,6 +50,14 @@ public class Viaje {
 
     public void setIdChofer(Integer idChofer) {
         this.idChofer = idChofer;
+    }
+
+    public String getNombreChofer() {
+        return nombreChofer;
+    }
+
+    public void setNombreChofer(String nombreChofer) {
+        this.nombreChofer = nombreChofer;
     }
 
     public Integer getIdRuta() {

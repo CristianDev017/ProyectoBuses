@@ -1,6 +1,10 @@
 package dao;
 
+import modelo.Bus;
+import modelo.Ruta;
+import modelo.Sucursal;
 import modelo.Viaje;
+import modelo.ViajeDetalle;
 import util.ConexionBD;
 
 import java.sql.*;
@@ -46,6 +50,86 @@ public class ViajeDAO {
         }
 
         return null;
+    }
+
+    public List<ViajeDetalle> listarRegularesDisponibles() {
+        List<ViajeDetalle> viajes = new ArrayList<>();
+        String sql = "SELECT v.*, r.id_sucursal_origen, r.id_sucursal_destino, r.precio_boleto, " +
+               "b.placa, b.capacidad, so.nombre AS nombre_origen, sd.nombre AS nombre_destino " +
+               "FROM Viaje v " +
+               "LEFT JOIN Ruta r ON r.id_ruta = v.id_ruta " +
+               "LEFT JOIN Bus b ON b.id_bus = v.id_bus " +
+               "LEFT JOIN Sucursal so ON so.id_sucursal = r.id_sucursal_origen " +
+               "LEFT JOIN Sucursal sd ON sd.id_sucursal = r.id_sucursal_destino " +
+               "WHERE v.tipo_viaje = 'REGULAR' AND v.estado = 'PROGRAMADO' " +
+               "ORDER BY v.fecha_salida ASC";
+
+        BoletoDAO boletoDAO = new BoletoDAO();
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+
+            while (rs.next()) {
+               Viaje viaje = new Viaje(
+                       rs.getInt("id_viaje"),
+                       rs.getObject("id_bus") == null ? null : rs.getInt("id_bus"),
+                       rs.getObject("id_chofer") == null ? null : rs.getInt("id_chofer"),
+                       rs.getObject("id_ruta") == null ? null : rs.getInt("id_ruta"),
+                       rs.getString("tipo_viaje"),
+                       rs.getTimestamp("fecha_salida"),
+                       rs.getTimestamp("fecha_llegada_estimada"),
+                       rs.getString("estado")
+               );
+
+               Ruta ruta = new Ruta();
+               if (rs.getObject("id_ruta") != null) {
+                   ruta.setIdRuta(rs.getInt("id_ruta"));
+                   ruta.setIdSucursalOrigen(rs.getObject("id_sucursal_origen") == null ? null : rs.getInt("id_sucursal_origen"));
+                   ruta.setIdSucursalDestino(rs.getObject("id_sucursal_destino") == null ? null : rs.getInt("id_sucursal_destino"));
+                   ruta.setPrecioBoleto(rs.getObject("precio_boleto") == null ? null : rs.getDouble("precio_boleto"));
+               }
+
+               Bus bus = new Bus();
+               if (rs.getObject("id_bus") != null) {
+                   bus.setIdBus(rs.getInt("id_bus"));
+                   bus.setPlaca(rs.getString("placa"));
+                   bus.setCapacidad(rs.getObject("capacidad") == null ? null : rs.getInt("capacidad"));
+               }
+
+               Sucursal origen = new Sucursal();
+               if (rs.getObject("id_sucursal_origen") != null) {
+                   origen.setIdSucursal(rs.getInt("id_sucursal_origen"));
+                   origen.setNombre(rs.getString("nombre_origen"));
+               }
+
+               Sucursal destino = new Sucursal();
+               if (rs.getObject("id_sucursal_destino") != null) {
+                   destino.setIdSucursal(rs.getInt("id_sucursal_destino"));
+                   destino.setNombre(rs.getString("nombre_destino"));
+               }
+
+               ViajeDetalle detalle = new ViajeDetalle();
+               detalle.setViaje(viaje);
+               detalle.setRuta(ruta);
+               detalle.setBus(bus);
+               detalle.setOrigen(origen);
+               detalle.setDestino(destino);
+               detalle.setRutaDescripcion((origen.getNombre() != null ? origen.getNombre() : "-") + " → " + (destino.getNombre() != null ? destino.getNombre() : "-"));
+               int capacidad = bus.getCapacidad() != null ? bus.getCapacidad() : 0;
+               detalle.setAsientosDisponibles(Math.max(0, capacidad - boletoDAO.contarAsientosVendidos(viaje.getIdViaje())));
+               Timestamp fechaSalida = viaje.getFechaSalida();
+               if (fechaSalida != null) {
+                   detalle.setFechaSalidaTexto(new java.text.SimpleDateFormat("dd/MM/yyyy").format(fechaSalida));
+                   detalle.setHoraSalidaTexto(new java.text.SimpleDateFormat("HH:mm").format(fechaSalida));
+               }
+               viajes.add(detalle);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return viajes;
     }
 
     public boolean actualizarEstado(int idViaje, String estado) {
@@ -122,33 +206,34 @@ public class ViajeDAO {
 
     public List<Viaje> listarTodos() {
         List<Viaje> viajes = new ArrayList<>();
-        String sql = "SELECT * FROM Viaje";
+        String sql = "SELECT v.*, c.nombre_completo AS nombre_chofer " +
+                    "FROM Viaje v LEFT JOIN Chofer c ON c.id_chofer = v.id_chofer";
 
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
-                int idViaje = rs.getInt("id_viaje");
+               int idViaje = rs.getInt("id_viaje");
 
-                int idBusVal = rs.getInt("id_bus");
-                Integer idBus = rs.wasNull() ? null : idBusVal;
+               int idBusVal = rs.getInt("id_bus");
+               Integer idBus = rs.wasNull() ? null : idBusVal;
 
-                int idChoferVal = rs.getInt("id_chofer");
-                Integer idChofer = rs.wasNull() ? null : idChoferVal;
+               int idChoferVal = rs.getInt("id_chofer");
+               Integer idChofer = rs.wasNull() ? null : idChoferVal;
 
-                int idRutaVal = rs.getInt("id_ruta");
-                Integer idRuta = rs.wasNull() ? null : idRutaVal;
+               int idRutaVal = rs.getInt("id_ruta");
+               Integer idRuta = rs.wasNull() ? null : idRutaVal;
 
-                String tipo = rs.getString("tipo_viaje");
-
+               String tipo = rs.getString("tipo_viaje");
                 Timestamp fechaSalida = rs.getTimestamp("fecha_salida");
                 Timestamp fechaLlegada = rs.getTimestamp("fecha_llegada_estimada");
-
-                String estado = rs.getString("estado");
+               String estado = rs.getString("estado");
+               String nombreChofer = rs.getString("nombre_chofer");
 
                 Viaje v = new Viaje(idViaje, idBus, idChofer, idRuta, tipo, fechaSalida, fechaLlegada, estado);
-                viajes.add(v);
+               v.setNombreChofer(nombreChofer);
+               viajes.add(v);
             }
 
         } catch (SQLException e) {
@@ -160,14 +245,39 @@ public class ViajeDAO {
 
     public boolean tieneViajesActivos(int idBus) {
         String sql = "SELECT COUNT(*) FROM Viaje WHERE id_bus = ? AND estado IN ('PROGRAMADO', 'EN_TRANSITO')";
-
         try (Connection con = ConexionBD.obtenerConexion();
              PreparedStatement ps = con.prepareStatement(sql)) {
             ps.setInt(1, idBus);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt(1) > 0;
-                }
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean tieneViajesActivosParaChofer(int idChofer) {
+        String sql = "SELECT COUNT(*) FROM Viaje WHERE id_chofer = ? AND estado IN ('PROGRAMADO', 'EN_TRANSITO')";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idChofer);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean tieneViajesActivosParaRuta(int idRuta) {
+        String sql = "SELECT COUNT(*) FROM Viaje WHERE id_ruta = ? AND estado IN ('PROGRAMADO', 'EN_TRANSITO')";
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, idRuta);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
             }
         } catch (SQLException e) {
             e.printStackTrace();

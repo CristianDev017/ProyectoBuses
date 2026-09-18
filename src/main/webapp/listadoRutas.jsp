@@ -13,6 +13,10 @@
     <h1>Rutas</h1>
     <a href="${pageContext.servletContext.contextPath}/ruta?accion=nuevo" class="btn btn-success mb-3">+ Nueva Ruta</a>
 
+    <c:if test="${not empty error}">
+        <div class="alert alert-danger">${error}</div>
+    </c:if>
+
     <table class="table table-striped">
         <thead>
         <tr>
@@ -36,6 +40,9 @@
                 <td>${r.estado}</td>
                 <td>
                     <a href="${pageContext.servletContext.contextPath}/ruta?accion=editar&id=${r.idRuta}" class="btn btn-sm btn-warning">Editar</a>
+                    <a href="${pageContext.servletContext.contextPath}/ruta?accion=eliminar&id=${r.idRuta}"
+                       class="btn btn-sm btn-danger"
+                       onclick="return confirm('¿Seguro que quieres eliminar esta ruta?')">Eliminar</a>
                 </td>
             </tr>
         </c:forEach>

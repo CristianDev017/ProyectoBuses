@@ -1,6 +1,7 @@
 package servlets;
 
 import dao.ChoferDAO;
+import dao.ViajeDAO;
 import modelo.Chofer;
 import modelo.Usuario;
 
@@ -19,10 +20,12 @@ import java.util.List;
 public class ChoferServlet extends HttpServlet {
 
     private ChoferDAO choferDAO;
+    private ViajeDAO viajeDAO;
 
     @Override
     public void init() {
         choferDAO = new ChoferDAO();
+        viajeDAO = new ViajeDAO();
     }
 
     private Usuario verificarSesion(HttpServletRequest req, HttpServletResponse resp, String requiredRole) throws IOException {
@@ -100,6 +103,14 @@ public class ChoferServlet extends HttpServlet {
         String idParam = req.getParameter("idChofer");
         if (idParam != null && !idParam.trim().isEmpty()) {
             ch.setIdChofer(Integer.parseInt(idParam));
+
+            if ("INACTIVO".equalsIgnoreCase(ch.getEstado()) && viajeDAO.tieneViajesActivosParaChofer(ch.getIdChofer())) {
+                req.setAttribute("error", "No se puede desactivar el chofer: tiene viajes programados o en tránsito.");
+                req.setAttribute("choferEditar", ch);
+                req.getRequestDispatcher("/registrarChofer.jsp").forward(req, resp);
+                return;
+            }
+
             boolean exito = choferDAO.actualizar(ch);
 
             if (!exito && choferDAO.getUltimoError() != null) {

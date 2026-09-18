@@ -1,5 +1,6 @@
 package servlets;
 
+import dao.CarteraDAO;
 import dao.UsuarioDAO;
 import modelo.Usuario;
 
@@ -15,10 +16,12 @@ import java.io.IOException;
 public class RegistroClienteServlet extends HttpServlet {
 
     private UsuarioDAO usuarioDAO;
+    private CarteraDAO carteraDAO;
 
     @Override
     public void init() {
         usuarioDAO = new UsuarioDAO();
+        carteraDAO = new CarteraDAO();
     }
 
     @Override
@@ -79,7 +82,10 @@ public class RegistroClienteServlet extends HttpServlet {
             usuarioDAO.actualizar(usuario);
             resp.sendRedirect(req.getContextPath() + "/usuario");
         } else {
-            usuarioDAO.insertarUsuario(usuario);
+            int idUsuario = usuarioDAO.insertarUsuario(usuario);
+            if (idUsuario > 0) {
+                carteraDAO.crearCartera(idUsuario);
+            }
             resp.sendRedirect(req.getContextPath() + "/?registrado=true");
         }
     }

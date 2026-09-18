@@ -10,6 +10,10 @@ public class Boleto {
     private Double precio;
     private Date fechaPago;
     private String estado;
+    private String rutaDescripcion;
+    private String fechaSalidaTexto;
+    private String horaSalidaTexto;
+    private String placaBus;
 
     public Boleto() {}
 
@@ -37,4 +41,12 @@ public class Boleto {
     public void setFechaPago(Date fechaPago) { this.fechaPago = fechaPago; }
     public String getEstado() { return estado; }
     public void setEstado(String estado) { this.estado = estado; }
+    public String getRutaDescripcion() { return rutaDescripcion; }
+    public void setRutaDescripcion(String rutaDescripcion) { this.rutaDescripcion = rutaDescripcion; }
+    public String getFechaSalidaTexto() { return fechaSalidaTexto; }
+    public void setFechaSalidaTexto(String fechaSalidaTexto) { this.fechaSalidaTexto = fechaSalidaTexto; }
+    public String getHoraSalidaTexto() { return horaSalidaTexto; }
+    public void setHoraSalidaTexto(String horaSalidaTexto) { this.horaSalidaTexto = horaSalidaTexto; }
+    public String getPlacaBus() { return placaBus; }
+    public void setPlacaBus(String placaBus) { this.placaBus = placaBus; }
 }

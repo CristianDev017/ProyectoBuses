@@ -34,7 +34,7 @@
       <tr>
         <td>${v.idViaje}</td>
         <td>${v.idBus}</td>
-        <td>${v.idChofer}</td>
+        <td>${not empty v.nombreChofer ? v.nombreChofer : v.idChofer}</td>
         <td>${v.idRuta}</td>
         <td>${v.tipoViaje}</td>
         <td><c:out value="${v.fechaSalida}"/></td>
