@@ -53,6 +53,10 @@ public class ChoferServlet extends HttpServlet {
             if (idParam != null && !idParam.trim().isEmpty()) {
                 try {
                     Chofer choferEditar = choferDAO.buscarPorId(Integer.parseInt(idParam));
+                    if (choferEditar == null || choferEditar.getIdSucursal() == null || !choferEditar.getIdSucursal().equals(usuarioLogueado.getIdSucursal())) {
+                        resp.sendRedirect(req.getContextPath() + "/chofer");
+                        return;
+                    }
                     req.setAttribute("choferEditar", choferEditar);
                     req.getRequestDispatcher("/registrarChofer.jsp").forward(req, resp);
                     return;
@@ -61,7 +65,7 @@ public class ChoferServlet extends HttpServlet {
             }
         }
 
-        List<Chofer> lista = choferDAO.listarTodos();
+        List<Chofer> lista = choferDAO.listarPorSucursal(usuarioLogueado.getIdSucursal());
         req.setAttribute("choferes", lista);
         req.getRequestDispatcher("/listadoChoferes.jsp").forward(req, resp);
     }
@@ -103,6 +107,13 @@ public class ChoferServlet extends HttpServlet {
         String idParam = req.getParameter("idChofer");
         if (idParam != null && !idParam.trim().isEmpty()) {
             ch.setIdChofer(Integer.parseInt(idParam));
+
+            // Verificar que el chofer a actualizar pertenezca a la sucursal del usuario
+            Chofer existente = choferDAO.buscarPorId(ch.getIdChofer());
+            if (existente == null || existente.getIdSucursal() == null || !existente.getIdSucursal().equals(usuarioLogueado.getIdSucursal())) {
+                resp.sendRedirect(req.getContextPath() + "/chofer");
+                return;
+            }
 
             if ("INACTIVO".equalsIgnoreCase(ch.getEstado()) && viajeDAO.tieneViajesActivosParaChofer(ch.getIdChofer())) {
                 req.setAttribute("error", "No se puede desactivar el chofer: tiene viajes programados o en tránsito.");

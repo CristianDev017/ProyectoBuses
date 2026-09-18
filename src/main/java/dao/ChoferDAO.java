@@ -171,4 +171,46 @@ public class ChoferDAO {
 
         return choferes;
     }
+
+    public List<Chofer> listarPorSucursal(int idSucursalFiltro) {
+        List<Chofer> choferes = new ArrayList<>();
+        String sql = "SELECT * FROM Chofer WHERE id_sucursal = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idSucursalFiltro);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                   int idChofer = rs.getInt("id_chofer");
+
+                   int idSucursalVal = rs.getInt("id_sucursal");
+                   Integer idSucursal = rs.wasNull() ? null : idSucursalVal;
+
+                   String foto = rs.getString("foto");
+                   String nombreCompleto = rs.getString("nombre_completo");
+                   String numeroLicencia = rs.getString("numero_licencia");
+                   String tipoLicencia = rs.getString("tipo_licencia");
+
+                   Date fecha = rs.getDate("fecha_vencimiento");
+
+                   String telefono = rs.getString("telefono");
+
+                   double salarioVal = rs.getDouble("salario_base_viaje");
+                   Double salario = rs.wasNull() ? null : salarioVal;
+
+                   String estado = rs.getString("estado");
+
+                   Chofer ch = new Chofer(idChofer, idSucursal, foto, nombreCompleto, numeroLicencia, tipoLicencia, fecha, telefono, salario, estado);
+                   choferes.add(ch);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return choferes;
+    }
 }

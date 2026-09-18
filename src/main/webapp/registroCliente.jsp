@@ -54,7 +54,6 @@
         <div class="mb-3">
             <label class="form-label">Contraseña</label>
             <input type="password" name="password" class="form-control" ${empty usuario ? 'required' : ''}>
-            <c:if test="${not empty usuario}"><small class="text-muted">Deja este campo vacío para conservar la contraseña actual.</small></c:if>
         </div>
         <button type="submit" class="btn btn-primary w-100">${not empty usuario ? 'Actualizar cuenta' : 'Crear cuenta'}</button>
     </form>

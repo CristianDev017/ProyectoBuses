@@ -65,6 +65,10 @@ public class BusServlet extends HttpServlet {
             if (idParam != null && !idParam.trim().isEmpty()) {
                 try {
                     Bus busEditar = busDAO.buscarPorId(Integer.parseInt(idParam));
+                    if (busEditar == null || busEditar.getIdSucursal() == null || !busEditar.getIdSucursal().equals(usuarioLogueado.getIdSucursal())) {
+                        resp.sendRedirect(req.getContextPath() + "/bus");
+                        return;
+                    }
                     req.setAttribute("busEditar", busEditar);
                     req.getRequestDispatcher("/registrarBus.jsp").forward(req, resp);
                     return;
@@ -73,7 +77,7 @@ public class BusServlet extends HttpServlet {
             }
         }
 
-        List<Bus> lista = busDAO.listarTodos();
+        List<Bus> lista = busDAO.listarPorSucursal(usuarioLogueado.getIdSucursal());
         req.setAttribute("buses", lista);
         req.getRequestDispatcher("/listadoBuses.jsp").forward(req, resp);
     }
@@ -122,6 +126,13 @@ public class BusServlet extends HttpServlet {
         String idParam = req.getParameter("idBus");
         if (idParam != null && !idParam.trim().isEmpty()) {
             bus.setIdBus(Integer.parseInt(idParam));
+
+            // Verificar que el bus que se intenta actualizar pertenezca a la sucursal del usuario
+            Bus existente = busDAO.buscarPorId(bus.getIdBus());
+            if (existente == null || existente.getIdSucursal() == null || !existente.getIdSucursal().equals(usuarioLogueado.getIdSucursal())) {
+                resp.sendRedirect(req.getContextPath() + "/bus");
+                return;
+            }
 
             if ("INACTIVO".equalsIgnoreCase(bus.getEstadoOperativo()) && viajeDAO.tieneViajesActivos(bus.getIdBus())) {
                 req.setAttribute("error", "No se puede desactivar el bus: tiene viajes programados o en tránsito.");

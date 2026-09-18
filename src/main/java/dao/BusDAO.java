@@ -184,6 +184,50 @@ public class BusDAO {
         return buses;
     }
 
+    public List<Bus> listarPorSucursal(int idSucursalFiltro) {
+        List<Bus> buses = new ArrayList<>();
+        String sql = "SELECT * FROM Bus WHERE id_sucursal = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idSucursalFiltro);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    int idBus = rs.getInt("id_bus");
+
+                    int idSucursalVal = rs.getInt("id_sucursal");
+                    Integer idSucursal = rs.wasNull() ? null : idSucursalVal;
+
+                    String foto = rs.getString("foto");
+                    String placa = rs.getString("placa");
+                    String marca = rs.getString("marca");
+                    String modelo = rs.getString("modelo");
+
+                    int anioVal = rs.getInt("anio_fabricacion");
+                    Integer anio = rs.wasNull() ? null : anioVal;
+
+                    int capacidadVal = rs.getInt("capacidad");
+                    Integer capacidad = rs.wasNull() ? null : capacidadVal;
+
+                    String estadoOperativo = rs.getString("estado_operativo");
+
+                    int kmVal = rs.getInt("kilometraje_actual");
+                    Integer kilometrajeActual = rs.wasNull() ? null : kmVal;
+
+                    Bus bus = new Bus(idBus, idSucursal, foto, placa, marca, modelo, anio, capacidad, estadoOperativo, kilometrajeActual);
+                    buses.add(bus);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return buses;
+    }
+
     public boolean actualizarKilometraje(int idBus, int nuevoKilometraje) {
         String sql = "UPDATE Bus SET kilometraje_actual = ? WHERE id_bus = ?";
 

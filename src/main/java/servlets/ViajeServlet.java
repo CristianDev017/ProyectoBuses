@@ -83,9 +83,9 @@ public class ViajeServlet extends HttpServlet {
         Usuario usuarioLogueado = verificarSesion(req, resp, "ADMINISTRADOR_DE_SUCURSAL");
         if (usuarioLogueado == null) return;
 
-        List<Bus> buses = busDAO.listarTodos();
-        List<Chofer> choferes = choferDAO.listarTodos();
-        List<Ruta> rutas = rutaDAO.listarTodas();
+        List<Bus> buses = busDAO.listarPorSucursal(usuarioLogueado.getIdSucursal());
+        List<Chofer> choferes = choferDAO.listarPorSucursal(usuarioLogueado.getIdSucursal());
+        List<Ruta> rutas = rutaDAO.listarPorOrigenSucursal(usuarioLogueado.getIdSucursal());
 
         req.setAttribute("buses", buses);
         req.setAttribute("choferes", choferes);
@@ -97,7 +97,7 @@ public class ViajeServlet extends HttpServlet {
             return;
         }
 
-        List<Viaje> viajes = viajeDAO.listarTodos();
+        List<Viaje> viajes = viajeDAO.listarPorSucursal(usuarioLogueado.getIdSucursal());
         req.setAttribute("viajes", viajes);
         req.getRequestDispatcher("/listadoViajes.jsp").forward(req, resp);
     }

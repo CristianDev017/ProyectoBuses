@@ -71,6 +71,11 @@ public class RutaServlet extends HttpServlet {
             if (idParam != null && !idParam.trim().isEmpty()) {
                 try {
                     Ruta rutaEditar = rutaDAO.buscarPorId(Integer.parseInt(idParam));
+                    // Verificar pertenencia: solo puede editar rutas cuyo origen es la sucursal del usuario
+                    if (rutaEditar == null || rutaEditar.getIdSucursalOrigen() == null || !rutaEditar.getIdSucursalOrigen().equals(usuarioLogueado.getIdSucursal())) {
+                        resp.sendRedirect(req.getContextPath() + "/ruta");
+                        return;
+                    }
                     req.setAttribute("rutaEditar", rutaEditar);
                     req.getRequestDispatcher("/registrarRuta.jsp").forward(req, resp);
                     return;
@@ -89,9 +94,15 @@ public class RutaServlet extends HttpServlet {
             if (idParam != null && !idParam.trim().isEmpty()) {
                 try {
                     int idRuta = Integer.parseInt(idParam);
+                    // Verificar que la ruta pertenezca a esta sucursal
+                    Ruta rutaAEliminar = rutaDAO.buscarPorId(idRuta);
+                    if (rutaAEliminar == null || rutaAEliminar.getIdSucursalOrigen() == null || !rutaAEliminar.getIdSucursalOrigen().equals(usuarioLogueado.getIdSucursal())) {
+                        resp.sendRedirect(req.getContextPath() + "/ruta");
+                        return;
+                    }
                     if (viajeDAO.tieneViajesActivosParaRuta(idRuta)) {
                         req.setAttribute("error", "No se puede eliminar la ruta: tiene viajes programados o en tránsito.");
-                        List<Ruta> rutas = rutaDAO.listarTodas();
+                        List<Ruta> rutas = rutaDAO.listarPorOrigenSucursal(usuarioLogueado.getIdSucursal());
                         req.setAttribute("rutas", rutas);
                         req.getRequestDispatcher("/listadoRutas.jsp").forward(req, resp);
                         return;
@@ -104,7 +115,7 @@ public class RutaServlet extends HttpServlet {
             return;
         }
 
-        List<Ruta> rutas = rutaDAO.listarTodas();
+        List<Ruta> rutas = rutaDAO.listarPorOrigenSucursal(usuarioLogueado.getIdSucursal());
         req.setAttribute("rutas", rutas);
         req.getRequestDispatcher("/listadoRutas.jsp").forward(req, resp);
     }

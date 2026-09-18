@@ -7,53 +7,41 @@
     <jsp:include page="/includes/resources.jsp"/>
     <style>
         .seat-btn {
-            width: 52px;
-            height: 52px;
+            width: 46px;
+            height: 46px;
             margin: 4px;
-            border-radius: 10px;
             font-weight: bold;
         }
         .seat-btn.selected {
-            background-color: #198754;
+            background: #0d6efd;
             color: white;
-            border-color: #198754;
-        }
-        .seat-btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.7;
         }
     </style>
 </head>
 <body>
 <jsp:include page="/includes/header.jsp"/>
 <div class="container mt-4">
-    <h1>Comprar boleto - Viaje #${viaje.idViaje}</h1>
+    <h2>Compra de boleto</h2>
 
     <c:if test="${not empty error}">
         <div class="alert alert-danger">${error}</div>
     </c:if>
 
-    <div class="row g-4">
-        <div class="col-lg-7">
-            <div class="card shadow-sm">
+    <div class="row">
+        <div class="col-md-7">
+            <div class="card">
                 <div class="card-body">
-                    <h4 class="mb-3">Selecciona tus asientos</h4>
-                    <p class="mb-3">
-                        <strong>Ruta:</strong> ${origen.nombre} → ${destino.nombre}<br>
-                        <strong>Fecha:</strong> ${fechaSalidaTexto} &nbsp; <strong>Hora:</strong> ${horaSalidaTexto}<br>
-                        <strong>Bus:</strong> ${bus.placa} &nbsp; <strong>Capacidad:</strong> ${bus.capacidad} pasajeros<br>
-                        <strong>Precio por boleto:</strong> Q${ruta.precioBoleto}
-                    </p>
+                    <p><strong>Ruta:</strong> ${origen.nombre} → ${destino.nombre}</p>
+                    <p><strong>Fecha:</strong> ${fechaSalidaTexto} &nbsp; <strong>Hora:</strong> ${horaSalidaTexto}</p>
+                    <p><strong>Bus:</strong> ${bus.placa} &nbsp; <strong>Precio:</strong> Q${ruta.precioBoleto}</p>
 
-                    <div class="text-center mb-3">
-                        <div class="d-inline-block p-2 border rounded bg-light">
-                            <span class="badge bg-success me-2">Disponible</span>
-                            <span class="badge bg-secondary me-2">Ocupado</span>
-                            <span class="badge bg-primary">Seleccionado</span>
-                        </div>
+                    <div class="mb-3">
+                        <span class="badge bg-success">Disponible</span>
+                        <span class="badge bg-secondary">Ocupado</span>
+                        <span class="badge bg-primary">Seleccionado</span>
                     </div>
 
-                    <div class="seat-layout text-center">
+                    <div class="text-center">
                         <c:forEach var="numeroAsiento" begin="1" end="${bus.capacidad}">
                             <c:set var="ocupado" value="false" />
                             <c:forEach var="ocupadoAsiento" items="${asientosOcupados}">
@@ -61,36 +49,31 @@
                                     <c:set var="ocupado" value="true" />
                                 </c:if>
                             </c:forEach>
-                            <button type="button"
-                                    class="seat-btn btn ${ocupado ? 'btn-secondary' : 'btn-success'}"
+                            <button type="button" class="btn seat-btn ${ocupado ? 'btn-secondary' : 'btn-success'}"
                                     data-seat="${numeroAsiento}"
-                                    ${ocupado ? 'disabled' : ''}>
-                                ${numeroAsiento}
-                            </button>
+                                    ${ocupado ? 'disabled' : ''}>${numeroAsiento}</button>
                         </c:forEach>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-lg-5">
-            <div class="card shadow-sm">
+        <div class="col-md-5">
+            <div class="card">
                 <div class="card-body">
-                    <h4>Resumen antes de confirmar</h4>
-                    <ul class="list-group list-group-flush mb-3">
-                        <li class="list-group-item"><strong>Viaje:</strong> #${viaje.idViaje}</li>
-                        <li class="list-group-item"><strong>Ruta:</strong> ${origen.nombre} → ${destino.nombre}</li>
-                        <li class="list-group-item"><strong>Fecha y hora:</strong> ${fechaSalidaTexto} ${horaSalidaTexto}</li>
-                        <li class="list-group-item"><strong>Bus:</strong> ${bus.placa}</li>
-                        <li class="list-group-item"><strong>Asientos:</strong> <span id="selectedSeatsText">Ninguno</span></li>
-                        <li class="list-group-item"><strong>Precio por boleto:</strong> Q${ruta.precioBoleto}</li>
-                        <li class="list-group-item"><strong>Total a pagar:</strong> <span id="totalCompraText">Q0.00</span></li>
-                        <li class="list-group-item"><strong>Saldo actual:</strong> Q${saldoActual}</li>
-                    </ul>
+                    <h5>Resumen</h5>
+                    <p><strong>Viaje:</strong> #${viaje.idViaje}</p>
+                    <p><strong>Ruta:</strong> ${origen.nombre} → ${destino.nombre}</p>
+                    <p><strong>Fecha/hora:</strong> ${fechaSalidaTexto} ${horaSalidaTexto}</p>
+                    <p><strong>Bus:</strong> ${bus.placa}</p>
+                    <p><strong>Asientos:</strong> <span id="selectedSeatsText">Ninguno</span></p>
+                    <p><strong>Precio por boleto:</strong> Q${ruta.precioBoleto}</p>
+                    <p><strong>Total:</strong> <span id="totalCompraText">Q0.00</span></p>
+                    <p><strong>Saldo actual:</strong> Q${saldoActual}</p>
 
-                    <form method="post" action="${pageContext.servletContext.contextPath}/boleto" id="compraForm">
+                    <form method="post" action="${pageContext.servletContext.contextPath}/boleto">
                         <input type="hidden" name="idViaje" value="${viaje.idViaje}">
-                        <input type="hidden" name="asientos" id="selectedSeatsInput" value="">
+                        <input type="hidden" name="asientos" id="selectedSeatsInput" value="${asientosSeleccionadosTexto}">
 
                         <div class="mb-3">
                             <label class="form-label">Fecha de pago</label>
@@ -107,16 +90,28 @@
 
 <script>
     const precioBoleto = Number('${ruta.precioBoleto}');
-    const saldoActual = Number('${saldoActual}');
     const selectedSeats = new Set();
-    const buttons = document.querySelectorAll('.seat-btn:not(:disabled)');
+    const initialSeats = document.getElementById('selectedSeatsInput').value;
+    if (initialSeats) {
+        initialSeats.split(',').forEach(function(value) {
+            const seat = Number(value.trim());
+            if (!Number.isNaN(seat)) selectedSeats.add(seat);
+        });
+    }
 
-    buttons.forEach(function(button) {
+    document.querySelectorAll('.seat-btn:not(:disabled)').forEach(function(button) {
+        const seat = Number(button.dataset.seat);
+        if (selectedSeats.has(seat)) {
+            button.classList.remove('btn-success');
+            button.classList.add('btn-primary');
+            button.classList.add('selected');
+        }
+
         button.addEventListener('click', function() {
-            const seat = Number(button.dataset.seat);
             if (selectedSeats.has(seat)) {
                 selectedSeats.delete(seat);
                 button.classList.remove('selected');
+                button.classList.remove('btn-primary');
                 button.classList.add('btn-success');
             } else {
                 selectedSeats.add(seat);
@@ -124,23 +119,21 @@
                 button.classList.remove('btn-success');
                 button.classList.add('btn-primary');
             }
-            updateSummary();
+            actualizarResumen();
         });
     });
 
-    function updateSummary() {
+    function actualizarResumen() {
         const seats = Array.from(selectedSeats).sort((a, b) => a - b);
         const total = seats.length * precioBoleto;
-        const saldoRestante = saldoActual - total;
-
         document.getElementById('selectedSeatsText').textContent = seats.length ? seats.join(', ') : 'Ninguno';
         document.getElementById('selectedSeatsInput').value = seats.join(',');
         document.getElementById('totalCompraText').textContent = 'Q' + total.toFixed(2);
-
-        const confirmButton = document.getElementById('confirmButton');
-        confirmButton.disabled = seats.length === 0;
-        confirmButton.textContent = seats.length === 0 ? 'Confirmar compra' : 'Confirmar compra de ' + seats.length + ' asiento(s)';
+        const boton = document.getElementById('confirmButton');
+        boton.disabled = seats.length === 0;
     }
+
+    actualizarResumen();
 </script>
 
 <jsp:include page="/includes/footer.jsp"/>

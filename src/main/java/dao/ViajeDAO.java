@@ -243,6 +243,50 @@ public class ViajeDAO {
         return viajes;
     }
 
+    public List<Viaje> listarPorSucursal(int idSucursalFiltro) {
+        List<Viaje> viajes = new ArrayList<>();
+        String sql = "SELECT v.*, c.nombre_completo AS nombre_chofer FROM Viaje v " +
+                     "LEFT JOIN Chofer c ON c.id_chofer = v.id_chofer " +
+                     "LEFT JOIN Bus b ON b.id_bus = v.id_bus " +
+                     "WHERE b.id_sucursal = ?";
+
+        try (Connection con = ConexionBD.obtenerConexion();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+
+            ps.setInt(1, idSucursalFiltro);
+
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                   int idViaje = rs.getInt("id_viaje");
+
+                   int idBusVal = rs.getInt("id_bus");
+                   Integer idBus = rs.wasNull() ? null : idBusVal;
+
+                   int idChoferVal = rs.getInt("id_chofer");
+                   Integer idChofer = rs.wasNull() ? null : idChoferVal;
+
+                   int idRutaVal = rs.getInt("id_ruta");
+                   Integer idRuta = rs.wasNull() ? null : idRutaVal;
+
+                   String tipo = rs.getString("tipo_viaje");
+                    Timestamp fechaSalida = rs.getTimestamp("fecha_salida");
+                    Timestamp fechaLlegada = rs.getTimestamp("fecha_llegada_estimada");
+                   String estado = rs.getString("estado");
+                   String nombreChofer = rs.getString("nombre_chofer");
+
+                    Viaje v = new Viaje(idViaje, idBus, idChofer, idRuta, tipo, fechaSalida, fechaLlegada, estado);
+                   v.setNombreChofer(nombreChofer);
+                   viajes.add(v);
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return viajes;
+    }
+
     public boolean tieneViajesActivos(int idBus) {
         String sql = "SELECT COUNT(*) FROM Viaje WHERE id_bus = ? AND estado IN ('PROGRAMADO', 'EN_TRANSITO')";
         try (Connection con = ConexionBD.obtenerConexion();
